@@ -1,0 +1,19 @@
+# Secrets
+.env
+*.env
+vault.yml
+*.vault
+*.pem
+*.key
+id_rsa*
+*.keytab
+
+# Real inventories and logs
+hosts.ini
+inventories/production/
+*.log
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
