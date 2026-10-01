@@ -1,3 +1,0 @@
-# OpenVAS
-
-Coming soon.
