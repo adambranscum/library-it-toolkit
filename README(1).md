@@ -11,9 +11,7 @@ Created for the **"Invisible Infrastructure, Visible Impact"** session and the *
 ## How to Use This Repo
 
 1. Find the guide you need in the tables below.
-2. Open its folder and read the `README.md` first, which starts with system requirements.
 3. Follow the steps in order.
-4. Start small. Every guide ends with a "Start Small" section for your first step.
 
 ## Guides
 
@@ -74,6 +72,3 @@ Questions, corrections, or want to share how it went at your library?
 
 Maintained by Adam Branscum, IT Manager, North Little Rock Public Library System.
 
-## License
-
-Add a license before publishing. **MIT** is a common choice for this kind of repo and lets other libraries use and adapt it freely.
