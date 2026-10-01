@@ -1,3 +1,0 @@
-# Gitea
-
-Coming soon.
