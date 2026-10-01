@@ -11,9 +11,7 @@ Created for the **"Invisible Infrastructure, Visible Impact"** session and the *
 ## How to Use This Repo
 
 1. Find the guide you need in the tables below.
-2. Open its folder and read the `README.md` first, which starts with system requirements.
 3. Follow the steps in order.
-4. Start small. Every guide ends with a "Start Small" section for your first step.
 
 ## Guides
 
@@ -21,41 +19,36 @@ Created for the **"Invisible Infrastructure, Visible Impact"** session and the *
 
 | Guide | What It Covers |
 |---|---|
-| [voip-fax](voip-fax/) | FreePBX phones, fax server, voice VLAN, DHCP provisioning, holiday messages |
-| [network](network/) | Collapsed core architecture and VLAN segmentation |
+| [VoIP and Fax](voip-fax/voip-fax-setup-guide.md) | FreePBX phones, fax server, voice VLAN, DHCP provisioning, holiday messages |
+| [Collapsed Core](network/Collapsed-Core-Architecture.md) | Collapsed core architecture: how it works, benefits, trade-offs |
 
 ### Monitoring and Security
 
 | Guide | What It Covers |
 |---|---|
-| [wazuh](wazuh/) | Device security monitoring (SIEM) and agent rollout |
-| [security-onion](security-onion/) | Network security monitoring with a mirror port |
-| [uptime-kuma](uptime-kuma/) | Uptime monitoring for vendors, servers, and your website |
-| [docker-alt-stack](docker-alt-stack/) | Wazuh, Malcolm, and Uptime Kuma in Docker on one server |
+| [Wazuh](wazuh/Wazuh-Setup-Guide.md) | Device security monitoring (SIEM) and agent rollout |
+| [Security Onion](security-onion/Security-Onion-Setup-Guide.md) | Network security monitoring with a mirror port |
+| [Uptime Kuma](uptime-kuma/Uptime-Kuma-Setup-Guide.md) | Uptime monitoring for vendors, servers, and your website |
+| [OpenVAS](openvas/openvas-setup-guide.md) | Vulnerability scanning with Greenbone Community Edition |
+| [Gophish](gophish/gophish-setup-guide.md) | Phishing awareness training for staff |
+| [Docker Alternative Stack](docker-alt-stack/docker-alt-stack-guide.md) | Wazuh, Malcolm, and Uptime Kuma in Docker on one server |
 
-### Endpoint Management
-
-| Guide | What It Covers |
-|---|---|
-| [meshcentral-ansible](meshcentral-ansible/) | Remote management, automated updates, scheduling, and logging |
-| [ansible-scripts](ansible-scripts/) | Example playbooks and scripts (placeholders only, no real hosts or secrets) |
-
-### Coming Soon
+### Tools and Management
 
 | Guide | What It Covers |
 |---|---|
-| gitea | Self-hosted Git for configs and documentation |
-| bitwarden | Self-hosted password management |
-| gophish | Phishing awareness training |
-| openvas | Vulnerability scanning |
+| [MeshCentral, Ansible, and Semaphore](meshcentral-ansible/) | Remote management, automated updates, scheduling, and logging |
+| [Ansible Scripts](ansible-scripts/) | Example playbooks and scripts (placeholders only, no real hosts or secrets) |
+| [Gitea](gitea/gitea-setup-guide.md) | Self-hosted Git for configs, scripts, and documentation |
+| [Vaultwarden](bitwarden/vaultwarden-setup-guide.md) | Self-hosted password manager that works with Bitwarden apps |
 
 ## By Presentation
 
 **Invisible Infrastructure, Visible Impact (session)**
-voip-fax, meshcentral-ansible, wazuh, uptime-kuma, security-onion, network, docker-alt-stack
+VoIP and Fax, MeshCentral/Ansible, Wazuh, Uptime Kuma, Security Onion, Collapsed Core, Docker Alternative Stack
 
 **Cybersecurity on a Library Budget (poster)**
-security-onion, wazuh, gitea, bitwarden, gophish, openvas, ansible-scripts
+Security Onion, Wazuh, OpenVAS, Gophish, Gitea, Vaultwarden, Ansible Scripts
 
 ## Before You Start
 
@@ -79,6 +72,3 @@ Questions, corrections, or want to share how it went at your library?
 
 Maintained by Adam Branscum, IT Manager, North Little Rock Public Library System.
 
-## License
-
-Add a license before publishing. **MIT** is a common choice for this kind of repo and lets other libraries use and adapt it freely.

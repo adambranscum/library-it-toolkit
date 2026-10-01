@@ -1,10 +1,10 @@
 # Uptime Kuma Setup Guide
 
-**Free monitoring for vendor systems, servers, and your website.**
-Invisible Infrastructure, Visible Impact | freewareforlibraries.org
-Questions? abranscum@nlrlibrary.org
+Free monitoring for vendor systems, servers, and your website.
 
----
+*Cybersecurity on a Library Budget | github.com/adambranscum/library-it-toolkit*
+
+*Questions? [abranscum@nlrlibrary.org](mailto:abranscum@nlrlibrary.org)*
 
 ## What It Does
 
@@ -14,8 +14,8 @@ Pairs with Wazuh: **Wazuh watches devices. Uptime Kuma watches everything else.*
 
 ## What You Need
 
-| | Minimum |
-|---|---|
+|  | Minimum |
+| --- | --- |
 | Memory | 1-2 GB |
 | Processors | 1 |
 | Storage | 10 GB |
@@ -25,7 +25,7 @@ It can share a server with Wazuh or any other light service.
 
 ## Step 1: Install Docker
 
-```bash
+```
 sudo apt update
 sudo apt install -y docker.io docker-compose-v2
 sudo systemctl enable --now docker
@@ -33,14 +33,14 @@ sudo systemctl enable --now docker
 
 ## Step 2: Create the Compose File
 
-```bash
+```
 sudo mkdir -p /opt/uptime-kuma && cd /opt/uptime-kuma
 sudo nano compose.yaml
 ```
 
 Paste:
 
-```yaml
+```
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:2
@@ -54,7 +54,7 @@ services:
 
 ## Step 3: Start It
 
-```bash
+```
 sudo docker compose up -d
 ```
 
@@ -69,7 +69,7 @@ sudo docker compose up -d
 Click **Add New Monitor**.
 
 | Monitor Type | Use It For | Example |
-|---|---|---|
+| --- | --- | --- |
 | HTTP(s) | Websites, catalog, vendor web portals | Library website |
 | Ping | Servers, switches, firewall, printers | Core switch |
 | TCP Port | A service that has no web page | Phone server, vendor server port |
@@ -98,10 +98,13 @@ Check the vendor's documentation for the port number to use.
 
 1. **Settings > Notifications > Setup Notification**.
 2. Pick a type:
-   - **Email (SMTP)**: works with any mail server.
-   - **Slack** or **Microsoft Teams**: paste the webhook URL.
-3. Check **Default enabled** so new monitors use it automatically.
-4. Click **Test**, then **Save**.
+
+\- **Email (SMTP)**: works with any mail server.
+
+\- **Slack** or **Microsoft Teams**: paste the webhook URL.
+
+1. Check **Default enabled** so new monitors use it automatically.
+2. Click **Test**, then **Save**.
 
 ## Step 8 (Optional): Status Page
 
@@ -111,27 +114,14 @@ Show staff a live wallboard or share it on a lobby TV.
 2. Add your monitors in groups (Servers, Websites, Vendors, Network).
 3. Save and open the page on a TV or staff browser.
 
-## Step 9: Keep It Healthy
+## Step 9: Keep It Updated
 
 Update every few months:
 
-```bash
+```
 cd /opt/uptime-kuma
 sudo docker compose pull
 sudo docker compose up -d
 ```
 
 Back up the `data` folder before updating.
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| Can't open the page | Check `sudo docker ps`, then check the server firewall allows port 3001 |
-| Too many false alerts | Raise Retries to 3, raise interval to 120 seconds |
-| Vendor monitor always red | Open the URL in a browser; confirm the keyword text matches exactly |
-| Alerts not arriving | Use the Test button in Notification settings |
-
-## Start Small
-
-Monitor these five things first: your website, your firewall, your core switch, your catalog, and your phone server. Add more over time.

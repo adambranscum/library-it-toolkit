@@ -1,63 +1,46 @@
 # Collapsed Core Architecture
 
-**A simpler network design for small and mid-size libraries.**
-Invisible Infrastructure, Visible Impact | freewareforlibraries.org
-Questions? abranscum@nlrlibrary.org
+A simpler network design for small and mid-size libraries.
 
----
+*Cybersecurity on a Library Budget | github.com/adambranscum/library-it-toolkit*
 
-## The Short Version
-
-A traditional network has three layers of switches. A **collapsed core** merges the top two into one. Fewer layers means fewer devices to buy, configure, and troubleshoot.
+*Questions? [abranscum@nlrlibrary.org](mailto:abranscum@nlrlibrary.org)*
 
 ## How It Works
-
-### Traditional Three-Tier
-
-```
-            [ CORE ]                <- fast backbone
-           /        \
-   [DISTRIBUTION] [DISTRIBUTION]    <- routing, policy, VLANs
-     /    \          /    \
- [ACCESS][ACCESS] [ACCESS][ACCESS]  <- staff, public, phones
-```
 
 ### Collapsed Core (Two-Tier)
 
 ```
-        [ CORE / DISTRIBUTION ]     <- one layer does both jobs
+        [ CORE / DISTRIBUTION] <- one layer does both jobs
          /     |      |      \
    [ACCESS] [ACCESS] [ACCESS] [ACCESS]
 ```
 
 The core switch (or a redundant pair) handles:
+
 - **Routing** between VLANs (staff, public, phones, IT)
 - **Uplinks** from every access switch
 - **Policy**, such as which VLANs can talk to each other
 
 Access switches only do what they do best: connect devices and pass traffic up.
 
-## Why It Fits a Library
+## Why It Fits Libraries
 
-Libraries usually have a few hundred ports per building, not thousands. A three-tier design is built for campus scale. A library doesn't need it.
-
-## Benefits
+Libraries usually have a few hundred ports per building, not thousands.
 
 | Benefit | What It Means |
-|---|---|
+| --- | --- |
 | **Lower cost** | Fewer switches to buy, power, and license. Older switches can be reused as access layer. |
 | **Simpler troubleshooting** | Fewer hops means fewer places for a problem to hide. |
 | **Faster traffic** | Traffic crosses fewer devices between any two points. |
 | **Easier changes** | VLANs and routing rules live in one place, not spread across layers. |
-| **Less rack space and power** | Fewer boxes, less heat, less cabling. |
+| **Less rack space and power** | Fewer switches, less heat, less cabling. |
 | **Easier to document** | A two-layer diagram is one a new staff member can understand. |
 
 ## Trade-Offs
 
-Be honest about these before you build.
-
-| Risk | How to Handle It |
-|---|---|
+|  |  |
+| --- | --- |
 | **Core is a single point of failure** | Use a redundant pair or a stacked/clustered switch if budget allows. Otherwise keep a spare and a current config backup. |
 | **Limited growth** | Works well up to a few hundred ports per site. Past that, plan a third tier. |
 | **Core needs enough capacity** | Choose a core with enough Layer 3 routing performance and uplink ports. |
@@ -87,7 +70,3 @@ Public traffic never touches staff resources. Voice traffic gets its own lane.
 8. Test staff, public, and phone traffic before opening.
 9. Back up every switch config and store it off the device.
 10. Update your network diagram.
-
-## Start Small
-
-If you have one flat network today, your first win is not new hardware. Pick your existing best switch as the core, put the other switches under it, and add one VLAN: **separate public from staff.**
