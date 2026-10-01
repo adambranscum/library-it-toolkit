@@ -1,0 +1,33 @@
+---
+# READ-ONLY. Reports pending Windows updates. Installs nothing.
+# Run:  ansible-playbook playbooks/scan-updates.yml -e target=branch_a_staff
+- name: Scan for pending Windows updates
+  hosts: "{{ target | default('windows') }}"
+  gather_facts: false
+  tasks:
+    - name: Make sure the log folder exists
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Search for updates
+      ansible.windows.win_updates:
+        category_names: "{{ update_categories }}"
+        state: searched
+      register: scan
+
+    - name: Show result
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ scan.found_update_count | default(0) }} pending update(s)"
+
+    - name: Log result
+      ansible.builtin.lineinfile:
+        path: "{{ log_dir }}/scan-updates.log"
+        line: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }} {{ inventory_hostname }} pending={{ scan.found_update_count | default(0) }}"
+        create: true
+        mode: "0644"
+      delegate_to: localhost
+      throttle: 1

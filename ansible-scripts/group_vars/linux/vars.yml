@@ -1,0 +1,6 @@
+---
+ansible_connection: ssh
+ansible_user: ansible
+# Use SSH keys. Give the account passwordless sudo, for example in
+# /etc/sudoers.d/ansible:   ansible ALL=(ALL) NOPASSWD:ALL
+ansible_become: true

@@ -1,0 +1,23 @@
+---
+# Updates Ubuntu/Debian servers with apt and reboots if required.
+# Run:  ansible-playbook playbooks/update-linux.yml -e target=linux_servers
+- name: Update Linux servers
+  hosts: "{{ target | default('linux') }}"
+  serial: 1
+  tasks:
+    - name: Upgrade packages
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        autoremove: true
+        autoclean: true
+
+    - name: Check if a reboot is needed
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_flag
+
+    - name: Reboot if needed
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: reboot_flag.stat.exists and (allow_reboot | default(true) | bool)

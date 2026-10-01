@@ -1,0 +1,9 @@
+---
+# Connectivity test. Confirms auth and module execution, not just the network.
+# Run:  ansible-playbook playbooks/win-ping.yml -e target=branch_a_staff
+- name: Test WinRM connectivity
+  hosts: "{{ target | default('windows') }}"
+  gather_facts: false
+  tasks:
+    - name: Ping
+      ansible.windows.win_ping:

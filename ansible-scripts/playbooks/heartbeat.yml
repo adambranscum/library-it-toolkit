@@ -1,0 +1,66 @@
+---
+# Collects CPU, RAM, and disk usage. Safe to run every 15-30 minutes.
+#   - Latest status per host:  logs/heartbeat/<host>.json
+#   - Threshold breaches:      logs/heartbeat-alerts.log
+# Run:  ansible-playbook playbooks/heartbeat.yml
+- name: Heartbeat
+  hosts: "{{ target | default('windows') }}"
+  gather_facts: false
+  tasks:
+    - name: Make sure output folders exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ log_dir }}"
+        - "{{ log_dir }}/heartbeat"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Collect metrics
+      ansible.windows.win_shell: |
+        $cpu = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
+        if ($null -eq $cpu) { $cpu = 0 }
+        $os = Get-CimInstance Win32_OperatingSystem
+        $ram = [math]::Round((($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / $os.TotalVisibleMemorySize) * 100, 1)
+        $disks = @(Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" | Where-Object { $_.Size -gt 0 } | ForEach-Object {
+          [pscustomobject]@{ drive = $_.DeviceID; used_percent = [math]::Round((($_.Size - $_.FreeSpace) / $_.Size) * 100, 1) }
+        })
+        [pscustomobject]@{ cpu_percent = [math]::Round([double]$cpu, 1); ram_percent = $ram; disks = $disks } | ConvertTo-Json -Compress -Depth 4
+      register: raw
+      changed_when: false
+
+    - name: Parse metrics
+      ansible.builtin.set_fact:
+        hb: "{{ raw.stdout | from_json }}"
+
+    # PowerShell can still collapse a single disk into a plain object. Normalize it.
+    - name: Normalize the disk list
+      ansible.builtin.set_fact:
+        disks_list: "{{ [hb.disks] if hb.disks is mapping else (hb.disks | default([])) }}"
+
+    - name: Find threshold breaches
+      ansible.builtin.set_fact:
+        breaches: >-
+          {{ (['CPU ' ~ hb.cpu_percent ~ '%'] if hb.cpu_percent | float > cpu_warn_percent | float else [])
+           + (['RAM ' ~ hb.ram_percent ~ '%'] if hb.ram_percent | float > ram_warn_percent | float else [])
+           + (disks_list | selectattr('used_percent', 'gt', disk_warn_percent | float)
+                | map(attribute='drive') | map('regex_replace', '^(.*)$', 'Disk \1 over limit') | list) }}
+
+    - name: Save latest status
+      ansible.builtin.copy:
+        content: "{{ {'host': inventory_hostname, 'checked': now().strftime('%Y-%m-%d %H:%M:%S'), 'cpu_percent': hb.cpu_percent, 'ram_percent': hb.ram_percent, 'disks': disks_list, 'breaches': breaches} | to_nice_json }}"
+        dest: "{{ log_dir }}/heartbeat/{{ inventory_hostname }}.json"
+        mode: "0644"
+      delegate_to: localhost
+
+    - name: Log breaches
+      ansible.builtin.lineinfile:
+        path: "{{ log_dir }}/heartbeat-alerts.log"
+        line: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }} {{ inventory_hostname }} {{ breaches | join(', ') }}"
+        create: true
+        mode: "0644"
+      delegate_to: localhost
+      throttle: 1
+      when: breaches | length > 0

@@ -1,0 +1,33 @@
+---
+# Upgrades installed apps with winget. Run it on a test machine first.
+# winget must be installed (App Installer) and can behave differently over WinRM
+# than at the console. Test before scheduling.
+# Run:  ansible-playbook playbooks/update-software.yml -e target=branch_a_staff
+- name: Upgrade software with winget
+  hosts: "{{ target | default('windows') }}"
+  gather_facts: false
+  tasks:
+    - name: Make sure the log folder exists
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Run winget upgrade
+      ansible.windows.win_shell: >
+        winget upgrade --all --silent
+        --accept-package-agreements --accept-source-agreements --disable-interactivity
+      register: wg
+      # 0 = ok. -1978335189 / 2316632107 = "no applicable update" (0x8A15002B).
+      failed_when: wg.rc not in [0, -1978335189, 2316632107]
+
+    - name: Log outcome
+      ansible.builtin.lineinfile:
+        path: "{{ log_dir }}/update-software.log"
+        line: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }} {{ inventory_hostname }} rc={{ wg.rc }}"
+        create: true
+        mode: "0644"
+      delegate_to: localhost
+      throttle: 1

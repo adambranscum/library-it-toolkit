@@ -1,0 +1,10 @@
+# Secrets - never commit
+**/vault.yml
+.vault_pass
+*.keytab
+.env
+
+# Runtime output
+logs/*
+!logs/.gitkeep
+*.retry

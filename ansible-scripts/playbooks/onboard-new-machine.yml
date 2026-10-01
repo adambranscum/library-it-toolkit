@@ -1,0 +1,65 @@
+---
+# Applies the baseline to a new Windows machine. Safe to re-run.
+# Edit the baseline_* variables in group_vars/windows/vars.yml first.
+# Run:  ansible-playbook playbooks/onboard-new-machine.yml -e target=a-pub-03.example.local
+- name: Onboard a new Windows machine
+  hosts: "{{ target }}"
+  gather_facts: false
+  tasks:
+    - name: Check connection
+      ansible.windows.win_ping:
+
+    - name: Set time zone
+      community.windows.win_timezone:
+        timezone: "{{ timezone }}"
+
+    # Installing from a network share needs credentials that survive the WinRM
+    # "second hop". runas with new_credentials passes them on.
+    - name: Install baseline apps
+      ansible.windows.win_package:
+        path: "{{ item.path }}"
+        arguments: "{{ item.arguments | default(omit) }}"
+        creates_path: "{{ item.creates_path | default(omit) }}"
+        state: present
+      loop: "{{ baseline_installers }}"
+      loop_control:
+        label: "{{ item.name }}"
+      become: true
+      become_method: ansible.builtin.runas
+      become_user: "{{ ansible_user }}"
+      vars:
+        ansible_become_password: "{{ ansible_password }}"
+        ansible_become_flags: "logon_type=new_credentials logon_flags=netcredentials_only"
+
+    - name: Add local group members
+      ansible.windows.win_group_membership:
+        name: "{{ item.group }}"
+        members: "{{ item.members }}"
+        state: present
+      loop: "{{ local_group_members }}"
+      loop_control:
+        label: "{{ item.group }}"
+
+    - name: Create desktop shortcuts
+      community.windows.win_shortcut:
+        src: "{{ item.url }}"
+        dest: "C:\\Users\\Public\\Desktop\\{{ item.name }}.url"
+      loop: "{{ desktop_shortcuts }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Configure auto-login (only if enabled)
+      when: auto_login_enabled | bool
+      no_log: true
+      block:
+        - name: Set auto-login registry values
+          ansible.windows.win_regedit:
+            path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+            name: "{{ item.name }}"
+            data: "{{ item.data }}"
+            type: string
+          loop:
+            - { name: AutoAdminLogon, data: "1" }
+            - { name: DefaultUserName, data: "{{ auto_login_user }}" }
+            - { name: DefaultDomainName, data: "{{ auto_login_domain }}" }
+            - { name: DefaultPassword, data: "{{ auto_login_password }}" }

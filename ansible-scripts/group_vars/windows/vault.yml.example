@@ -1,0 +1,7 @@
+---
+# Copy to vault.yml, set the real value, then encrypt:
+#   cp vault.yml.example vault.yml
+#   ansible-vault encrypt vault.yml
+# vault.yml is in .gitignore. Never commit the real file.
+vault_ansible_password: "CHANGE-ME"
+# vault_auto_login_password: "CHANGE-ME"

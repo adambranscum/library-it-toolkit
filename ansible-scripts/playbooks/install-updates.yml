@@ -1,0 +1,61 @@
+---
+# Installs Windows updates, reboots if needed, logs the outcome.
+# Run:  ansible-playbook playbooks/install-updates.yml -e target=branch_a_staff
+# Tip:  schedule one group at a time (staggered) so a whole branch is never down at once.
+- name: Install Windows updates
+  hosts: "{{ target | default('windows') }}"
+  gather_facts: false
+  serial: "{{ batch_size | default(10) }}"
+  tasks:
+    - name: Make sure the log folder exists
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      run_once: true
+
+    # reboot is handled in a separate task below.
+    # win_updates' own reboot option can fail to reconnect over WinRM.
+    - name: Install updates
+      ansible.windows.win_updates:
+        category_names: "{{ update_categories }}"
+        state: installed
+        reboot: false
+      register: upd
+      ignore_errors: true
+
+    - name: Work out the summary
+      ansible.builtin.set_fact:
+        installed_count: "{{ upd.installed_update_count | default(0) }}"
+        failed_titles: >-
+          {{ (upd.updates | default({})) | dict2items
+             | selectattr('value.failed', 'defined')
+             | selectattr('value.failed')
+             | map(attribute='value.title') | list }}
+
+    - name: Reboot if required
+      ansible.windows.win_reboot:
+        reboot_timeout: "{{ reboot_timeout }}"
+        post_reboot_delay: 60
+      when:
+        - allow_reboot | bool
+        - upd.reboot_required | default(false)
+
+    - name: Log outcome
+      ansible.builtin.lineinfile:
+        path: "{{ log_dir }}/install-updates.log"
+        line: >-
+          {{ now().strftime('%Y-%m-%d %H:%M:%S') }} {{ inventory_hostname }}
+          installed={{ installed_count }} failed={{ failed_titles | length }}
+          reboot={{ upd.reboot_required | default(false) }}
+          {{ 'MODULE-ERROR: ' ~ (upd.msg | default('')) if upd is failed else '' }}
+        create: true
+        mode: "0644"
+      delegate_to: localhost
+      throttle: 1
+
+    - name: Fail the run if the update module failed
+      ansible.builtin.fail:
+        msg: "Update run failed on {{ inventory_hostname }}: {{ upd.msg | default('unknown error') }}"
+      when: upd is failed

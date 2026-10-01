@@ -1,0 +1,55 @@
+---
+# --- WinRM connection (matches the Ansible + WinRM Setup Guide) ---
+ansible_connection: winrm
+ansible_port: 5985
+ansible_winrm_scheme: http
+ansible_winrm_transport: ntlm
+ansible_user: "svc-ansible@EXAMPLE.LOCAL"
+ansible_password: "{{ vault_ansible_password }}"
+ansible_winrm_operation_timeout_sec: 120
+ansible_winrm_read_timeout_sec: 150
+
+# --- Kerberos alternative (no password stored in Ansible) ---
+# Needs krb5-user, pywinrm[kerberos], /etc/krb5.conf, and a ticket from
+# kinit (or a keytab refreshed by cron). Replace the NTLM lines above with:
+#   ansible_winrm_transport: kerberos
+#   ansible_user: "svc-ansible@EXAMPLE.LOCAL"
+# and remove ansible_password.
+
+# --- Updates ---
+update_categories:
+  - SecurityUpdates
+  - CriticalUpdates
+  - UpdateRollups
+  - DefinitionUpdates
+allow_reboot: true
+reboot_timeout: 1200
+
+# --- Onboarding baseline (used by onboard-new-machine.yml) ---
+timezone: "Central Standard Time"
+
+# Installers on a share. One entry per app.
+# creates_path is how Ansible knows it is already installed.
+baseline_installers: []
+#  - name: Example App
+#    path: '\\fileserver01.example.local\Installers\ExampleApp.msi'
+#    arguments: '/qn /norestart'
+#    creates_path: 'C:\Program Files\ExampleApp\app.exe'
+
+# Local group membership. Members can be domain users or groups.
+local_group_members: []
+#  - group: Remote Desktop Users
+#    members:
+#      - 'EXAMPLE\Library Staff'
+
+# Desktop shortcuts for all users.
+desktop_shortcuts: []
+#  - name: Library Catalog
+#    url: 'https://catalog.example.org'
+
+# Auto-login is OFF by default. It stores the password in the registry in
+# plain text. Only use it on locked-down public machines with a low-privilege account.
+auto_login_enabled: false
+auto_login_user: ""
+auto_login_domain: ""
+auto_login_password: "{{ vault_auto_login_password | default('') }}"
